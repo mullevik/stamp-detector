@@ -19,7 +19,7 @@ def show_bordered_image(bounding_rectangles: List[Tuple],
     """
     bordered_image = rgb_image.copy()
 
-    tab_colors = [int(colors.to_rgb(x) * 255)
+    tab_colors = [[int(y * 255) for y in colors.to_rgb(x)]
                   for x in colors.TABLEAU_COLORS.values()]
     for i, bbox in enumerate(bounding_rectangles):
         x, y, w, h = bbox

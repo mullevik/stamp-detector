@@ -2,17 +2,22 @@
 This file contains functions required for the clustering of information
 blobs based on pixel locations and HUE
 """
+import datetime
+from time import time
 from typing import List, Tuple
+import logging
 
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
+log = logging.getLogger(__name__)
 
-def cluster_image(image: np.ndarray,
-                  bin_image: np.ndarray,
-                  n_clusters: int = 3,
-                  color_weight: float = 1.) -> Tuple[List[np.ndarray], float]:
+
+def cluster_document(image: np.ndarray,
+                     bin_image: np.ndarray,
+                     n_clusters: int = 3,
+                     color_weight: float = 1.) -> Tuple[List[np.ndarray], float]:
     """
     Clusters foreground pixels based on their position and HUE.
     This functions uses sklearn.cluster.KMeans:
@@ -45,6 +50,9 @@ def cluster_image(image: np.ndarray,
                     init="k-means++",
                     random_state=42)
 
+    log.debug(f"Starting KMeans clustering ({n_clusters} clusters, "
+              f"{color_weight} color weight)")
+    t_start = time()
     kmeans_output = kmeans.fit(observations)
 
     cluster_images = []
@@ -65,5 +73,10 @@ def cluster_image(image: np.ndarray,
         cluster_center = kmeans.cluster_centers_[i]
         costs = np.linalg.norm(cluster_observations - cluster_center, axis=1)
         total_cost += np.sum(costs)
+
+    t_end = time()
+
+    log.debug(f"Finished clustering in "
+              f"{datetime.timedelta(seconds=t_end - t_start)}")
 
     return cluster_images, total_cost
